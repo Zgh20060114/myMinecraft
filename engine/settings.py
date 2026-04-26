@@ -15,3 +15,7 @@ H_FOV = glm.atan(glm.tan(V_FOV / 2) * ASPECT_RATIO)
 NEAR = 0.1
 FAR = 2000
 PITCH_MAX = glm.radians(89)
+
+PLAYER_WALK_SPEED = 0.005
+PLAYER_ROTATE_SPEED = 0.003
+PLAYER_
