@@ -1,8 +1,9 @@
-from .settings import *
+from engine.settings import *
 import pygame as pg
 import moderngl as mgl
-from . import shaderProgram as sp
-from .scene import Scene
+from engine.shaderProgram import ShaderProgram
+from engine.scene import Scene
+from engine.player import Player
 
 
 class VoxelEngine:
@@ -15,6 +16,8 @@ class VoxelEngine:
             pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE
         )
         pg.display.gl_set_attribute(pg.GL_DEPTH_SIZE, 24)  # 指定
+        pg.event.set_grab(True)
+        pg.mouse.set_visible(False)
         self.screen = pg.display.set_mode(WIN_SIZE, pg.OPENGL | pg.DOUBLEBUF)  # 创建
         self.font = pg.font.Font(None, 36)
         self.context = mgl.create_context()
@@ -28,7 +31,8 @@ class VoxelEngine:
         self.delta_time = 0  # 帧时间
         self.is_running = True
 
-        self.shader_program_manage = sp.ShaderProgram(self)
+        self.player = Player(self)
+        self.shader_program_manage = ShaderProgram(self)
         # self.shader_program_quard = self.shader_program_manage.getProgram("quard")
         # self.quard_mesh = QuardMesh(self)
         self.scene = Scene(self)
@@ -36,6 +40,7 @@ class VoxelEngine:
     def update(self):
         self.shader_program_manage.update()
         self.scene.update()
+        self.player.update()
         self.delta_time = self.clock.tick(60)
         self.time = pg.time.get_ticks() / 1000
         # pg.display.set_caption(str(self.delta_time))

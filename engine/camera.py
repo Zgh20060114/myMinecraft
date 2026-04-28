@@ -1,5 +1,4 @@
 import glm
-from numba.core.types import NestedArray
 
 from engine.settings import ASPECT_RATIO, FAR, NEAR, PITCH_MAX, V_FOV
 
@@ -18,6 +17,7 @@ class Camera:
 
         self.view_matrix = glm.mat4()
         self.projection_matrix = glm.perspective(V_FOV, ASPECT_RATIO, NEAR, FAR)
+        self.model_matrix = glm.mat4(1.0)
 
     def updateCameraVector(self):
         # yaw是从-90开始的
@@ -40,11 +40,11 @@ class Camera:
         self.updateViewMatrix()
 
     def rotatePitch(self, delta_pitch):
-        self.pitch += glm.radians(delta_pitch)
+        self.pitch += delta_pitch
         self.pitch = glm.clamp(self.pitch, -PITCH_MAX, PITCH_MAX)
 
     def rotateYaw(self, delt_yaw):
-        self.yaw += glm.radians(delt_yaw)
+        self.yaw -= delt_yaw
 
     def move_forward(self, velocity):
         self.position += self.forward * velocity

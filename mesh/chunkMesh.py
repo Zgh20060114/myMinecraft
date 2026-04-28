@@ -1,16 +1,16 @@
 from typing import TYPE_CHECKING
 import numpy as np
-from .baseMesh import BaseMesh
+from mesh.baseMesh import BaseMesh
 
 if TYPE_CHECKING:
     from engine.VoxelEngine import VoxelEngine
+    from world.chunk import Chunk
 
 
-class QuardMesh(BaseMesh):
-    def __init__(self, engine: VoxelEngine):
-        super().__init__(engine)
-        # self.context = engine.context
-        self.sp = engine.shader_program_manage.quard
+class ChunkMesh(BaseMesh):
+    def __init__(self, chunk: Chunk):
+        super().__init__(chunk.engine)
+        self.sp = chunk.engine.shader_program_manage.chunk
         self.vbo_format = "3f 3f"
         self.vbo_attribution = ("in_position", "in_color")
         self.vao = self.getVAO()

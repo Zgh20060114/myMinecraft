@@ -1,5 +1,5 @@
 from typing import TYPE_CHECKING
-from mesh.quardMesh import QuardMesh
+from world.chunk import Chunk
 
 if TYPE_CHECKING:
     from engine.VoxelEngine import VoxelEngine
@@ -7,10 +7,10 @@ if TYPE_CHECKING:
 
 class Scene:
     def __init__(self, engine: VoxelEngine):
-        self.quard = QuardMesh(engine)
+        self.chunk = Chunk(engine)
 
     def update(self):
         pass
 
     def render(self):
-        self.quard.render()
+        self.chunk.render()
