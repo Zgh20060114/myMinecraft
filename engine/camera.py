@@ -28,7 +28,9 @@ class Camera:
 
         self.forward = glm.normalize(forward)
         self.right = glm.normalize(glm.cross(self.forward, self.world_up))
-        self.up = glm.normalize(glm.cross(self.right, self.forward))
+        self.up = glm.normalize(
+            glm.cross(self.right, self.forward)
+        )  # 叉乘axb=-bxa, openggl中上=右x前,反了上下颠倒
 
     def updateViewMatrix(self):
         self.view_matrix = glm.lookAt(
@@ -40,11 +42,11 @@ class Camera:
         self.updateViewMatrix()
 
     def rotatePitch(self, delta_pitch):
-        self.pitch += delta_pitch
+        self.pitch -= delta_pitch
         self.pitch = glm.clamp(self.pitch, -PITCH_MAX, PITCH_MAX)
 
     def rotateYaw(self, delt_yaw):
-        self.yaw -= delt_yaw
+        self.yaw += delt_yaw
 
     def move_forward(self, velocity):
         self.position += self.forward * velocity

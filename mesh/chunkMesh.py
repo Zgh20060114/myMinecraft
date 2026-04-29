@@ -26,7 +26,7 @@ class ChunkMesh(BaseMesh):
         for x in range(CHUNK_SIZE):
             for y in range(CHUNK_SIZE):
                 for z in range(CHUNK_SIZE):
-                    voxels[x + CHUNK_SIZE * z + CHUNK_AREA * y] = 1
+                    voxels[x + CHUNK_SIZE * z + CHUNK_AREA * y] = x + y + z
         return voxels
 
     def appendVD(self, vbd, index, *vds):
@@ -103,4 +103,4 @@ class ChunkMesh(BaseMesh):
                         vbd_index = self.appendVD(
                             vbd, vbd_index, v0, v2, v3, v0, v1, v2
                         )
-        return vbd[: vbd_index + 1]
+        return vbd[:vbd_index]
