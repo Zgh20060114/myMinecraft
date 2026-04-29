@@ -16,8 +16,8 @@ class VoxelEngine:
             pg.GL_CONTEXT_PROFILE_MASK, pg.GL_CONTEXT_PROFILE_CORE
         )
         pg.display.gl_set_attribute(pg.GL_DEPTH_SIZE, 24)  # 指定
-        pg.event.set_grab(True)
-        pg.mouse.set_visible(False)
+        # pg.event.set_grab(True)
+        # pg.mouse.set_visible(False)
         self.screen = pg.display.set_mode(WIN_SIZE, pg.OPENGL | pg.DOUBLEBUF)  # 创建
         self.font = pg.font.Font(None, 36)
         self.context = mgl.create_context()

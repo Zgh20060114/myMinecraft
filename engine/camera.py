@@ -28,7 +28,7 @@ class Camera:
 
         self.forward = glm.normalize(forward)
         self.right = glm.normalize(glm.cross(self.forward, self.world_up))
-        self.up = glm.normalize(glm.cross(self.forward, self.right))
+        self.up = glm.normalize(glm.cross(self.right, self.forward))
 
     def updateViewMatrix(self):
         self.view_matrix = glm.lookAt(
