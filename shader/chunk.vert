@@ -3,7 +3,8 @@ layout(location=0) in uvec3 in_position;
 layout(location=1) in uint  in_voxel_id;
 layout(location=2) in uint  in_face_id;
 
-out vec3 out_color;
+out vec2 out_uv;
+out vec3 out_voxel_color;
 
 uniform mat4 m_model;
 uniform mat4 m_view;
@@ -16,13 +17,24 @@ vec3 get_color(float p) {
     return fract((p3.xxy + p3.yzz) * p3.zyx) + 0.05;
 }
 
+const vec2 uv_coords[4] = vec2[](
+    vec2(0.0, 0.0),
+    vec2(0.0, 1.0),
+    vec2(1.0,1.0),
+    vec2(1.0, 0.0)
+    );
+const int uv_indices[6] = int[](1,0,3,1,3,2);
+
 void main(){
   gl_Position = m_projection * m_view * m_model * vec4(in_position, 1.0f);
 
-  out_color = get_color(in_voxel_id);
-  if (in_face_id == 0u) {
-    // out_color = vec4(0.0f,1.0f,1.0f, 1.0f);
-    out_color = vec3(in_voxel_id * 0.1, in_face_id * 0.1, 0.5);
-  }
+  out_voxel_color = get_color(in_voxel_id);
+  // if (in_face_id == 0u) {
+  //   // out_color = vec4(0.0f,1.0f,1.0f, 1.0f);
+  //   out_color = vec3(in_voxel_id * 0.1, in_face_id * 0.1, 0.5);
+  // }
   // out_color = vec4(0.6f,0.4f,0.5f, 1.0f);
+  if(in_voxel_id != 0u && in_face_id != 6u){
+    out_uv = uv_coords[uv_indices[gl_VertexID % 6 ]];
+  }
 }

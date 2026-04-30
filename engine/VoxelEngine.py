@@ -4,11 +4,13 @@ import moderngl as mgl
 from engine.shaderProgram import ShaderProgram
 from engine.scene import Scene
 from engine.player import Player
+from engine.texture import Texture
 
 
 class VoxelEngine:
     def __init__(self) -> None:
         pg.init()
+        # print(f"支持扩展格式: {pg.image.get_extended()}")
         pg.font.init()
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MAJOR_VERSION, 3)
         pg.display.gl_set_attribute(pg.GL_CONTEXT_MINOR_VERSION, 3)
@@ -32,6 +34,7 @@ class VoxelEngine:
         self.is_running = True
 
         self.player = Player(self)
+        self.texture_manage = Texture(self)
         self.shader_program_manage = ShaderProgram(self)
         # self.shader_program_quard = self.shader_program_manage.getProgram("quard")
         # self.quard_mesh = QuardMesh(self)

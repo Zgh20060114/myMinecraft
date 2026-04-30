@@ -1,4 +1,6 @@
 from typing import TYPE_CHECKING
+from glm import simplex, vec3
+import glm
 import numpy as np
 from mesh.baseMesh import BaseMesh
 from engine.settings import CHUNK_AREA, CHUNK_SIZE, CHUNK_VOL
@@ -26,7 +28,11 @@ class ChunkMesh(BaseMesh):
         for x in range(CHUNK_SIZE):
             for y in range(CHUNK_SIZE):
                 for z in range(CHUNK_SIZE):
-                    voxels[x + CHUNK_SIZE * z + CHUNK_AREA * y] = x + y + z
+                    voxels[x + CHUNK_SIZE * z + CHUNK_AREA * y] = (
+                        x + y + z + 1
+                        if (glm.simplex(glm.vec3(x, y, z) * 0.01) + 1 > 0.5)
+                        else 0
+                    )
         return voxels
 
     def appendVD(self, vbd, index, *vds):
@@ -50,7 +56,11 @@ class ChunkMesh(BaseMesh):
                         continue
                     # cull_face 面剔除,要求三角形顶点逆时针传递,从立方体外面看,不能透过别的面来看,不然就不叫面剔除了
                     # 顶面
-                    if y == CHUNK_SIZE - 1:
+                    if (
+                        y == CHUNK_SIZE - 1
+                        or chunk_voxels_id[x + CHUNK_SIZE * z + CHUNK_AREA * (y + 1)]
+                        == 0
+                    ):
                         v0 = (x, y + 1, z, voxel_id, 0)
                         v1 = (x + 1, y + 1, z, voxel_id, 0)
                         v2 = (x + 1, y + 1, z + 1, voxel_id, 0)
@@ -59,7 +69,11 @@ class ChunkMesh(BaseMesh):
                             vbd, vbd_index, v0, v3, v2, v0, v2, v1
                         )
                     # 底面
-                    if y == 0:
+                    if (
+                        y == 0
+                        or chunk_voxels_id[x + CHUNK_SIZE * z + CHUNK_AREA * (y - 1)]
+                        == 0
+                    ):
                         v0 = (x, y, z, voxel_id, 1)
                         v1 = (x + 1, y, z, voxel_id, 1)
                         v2 = (x + 1, y, z + 1, voxel_id, 1)
@@ -68,7 +82,10 @@ class ChunkMesh(BaseMesh):
                             vbd, vbd_index, v0, v2, v3, v0, v1, v2
                         )
                     # 右面
-                    if x == CHUNK_SIZE - 1:
+                    if (
+                        x == CHUNK_SIZE - 1
+                        or chunk_voxels_id[x + 1 + CHUNK_SIZE * z + CHUNK_AREA * y] == 0
+                    ):
                         v0 = (x + 1, y, z, voxel_id, 2)
                         v1 = (x + 1, y, z + 1, voxel_id, 2)
                         v2 = (x + 1, y + 1, z + 1, voxel_id, 2)
@@ -77,7 +94,10 @@ class ChunkMesh(BaseMesh):
                             vbd, vbd_index, v0, v3, v2, v0, v2, v1
                         )
                     # 左面
-                    if x == 0:
+                    if (
+                        x == 0
+                        or chunk_voxels_id[x - 1 + CHUNK_SIZE * z + CHUNK_AREA * y] == 0
+                    ):
                         v0 = (x, y, z, voxel_id, 3)
                         v1 = (x, y, z + 1, voxel_id, 3)
                         v2 = (x, y + 1, z + 1, voxel_id, 3)
@@ -86,7 +106,11 @@ class ChunkMesh(BaseMesh):
                             vbd, vbd_index, v0, v2, v3, v0, v1, v2
                         )
                     # 前面
-                    if z == CHUNK_SIZE - 1:
+                    if (
+                        z == CHUNK_SIZE - 1
+                        or chunk_voxels_id[x + CHUNK_SIZE * (z + 1) + CHUNK_AREA * y]
+                        == 0
+                    ):
                         v0 = (x, y, z + 1, voxel_id, 4)
                         v1 = (x, y + 1, z + 1, voxel_id, 4)
                         v2 = (x + 1, y + 1, z + 1, voxel_id, 4)
@@ -95,7 +119,11 @@ class ChunkMesh(BaseMesh):
                             vbd, vbd_index, v0, v3, v2, v0, v2, v1
                         )
                     # 后面
-                    if z == 0:
+                    if (
+                        z == 0
+                        or chunk_voxels_id[x + CHUNK_SIZE * (z - 1) + CHUNK_AREA * y]
+                        == 0
+                    ):
                         v0 = (x, y, z, voxel_id, 5)
                         v1 = (x, y + 1, z, voxel_id, 5)
                         v2 = (x + 1, y + 1, z, voxel_id, 5)

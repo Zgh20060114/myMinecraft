@@ -8,6 +8,7 @@ class ShaderProgram:
     def __init__(self, engine: VoxelEngine) -> None:
         self.context = engine.context
         self.player = engine.player
+        self.texture_manage = engine.texture_manage
         self.chunk = self.getProgram("chunk")
         self.setUniformsOnInit()
 
@@ -24,6 +25,7 @@ class ShaderProgram:
         self.chunk["m_view"].write(self.player.view_matrix)
         self.chunk["m_projection"].write(self.player.projection_matrix)
         self.chunk["m_model"].write(self.player.model_matrix)
+        self.chunk["texture_0"].value = 0
 
     def update(self):
         self.chunk["m_view"].write(self.player.view_matrix)
