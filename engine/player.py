@@ -38,7 +38,7 @@ class Player(Camera):
             self.move_left(velocity)
         if key[pg.K_d]:
             self.move_right(velocity)
-        if key[pg.K_q]:
+        if key[pg.K_LALT]:
             self.move_up(velocity)
-        if key[pg.K_e]:
+        if key[pg.K_LCTRL]:
             self.move_down(velocity)

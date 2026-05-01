@@ -1,38 +1,50 @@
 from typing import TYPE_CHECKING
+from warnings import simplefilter
 from glm import simplex, vec3
 import glm
 import numpy as np
+from mesh import baseMesh
 from mesh.baseMesh import BaseMesh
-from engine.settings import CHUNK_AREA, CHUNK_SIZE, CHUNK_VOL
+from engine.settings import CHUNK_AREA, CHUNK_SIZE, CHUNK_VOL, WIN_SIZE
 
 if TYPE_CHECKING:
     from engine.VoxelEngine import VoxelEngine
+    from world.world import World
 
 
 class ChunkMesh(BaseMesh):
-    def __init__(self, engine: VoxelEngine):
+    def __init__(self, engine: VoxelEngine, world: World, position=glm.ivec3(0, 0, 0)):
         super().__init__(engine)
         self.sp = engine.shader_program_manage.chunk
+        self.position = position
         self.vbo_format = "3u1 1u1 1u1"
         self.vbo_attribution = ("in_position", "in_voxel_id", "in_face_id")
         self.vbo_format_size = sum(int(form[0]) for form in self.vbo_format.split(" "))
         self.chunk_voxels_id = self.buildVoxelsId()
+        self.world = world.world_voxels_id
         self.vao = self.getVAO()
+        self.is_all_zero = False
 
     def getVertexBufferDate(self) -> np.ndarray:
+        print(self.world[1, 1:10])
         return self.getChunkVBD(self.chunk_voxels_id, self.vbo_format_size)
 
+    # 决定了当前voxel的有无和种类
     def buildVoxelsId(self):
         voxels = np.zeros(CHUNK_VOL, dtype=np.uint8)
+        bx, by, bz = self.position * CHUNK_SIZE
 
         for x in range(CHUNK_SIZE):
-            for y in range(CHUNK_SIZE):
-                for z in range(CHUNK_SIZE):
-                    voxels[x + CHUNK_SIZE * z + CHUNK_AREA * y] = (
-                        x + y + z + 1
-                        if (glm.simplex(glm.vec3(x, y, z) * 0.01) + 1 > 0.5)
-                        else 0
-                    )
+            for z in range(CHUNK_SIZE):
+                wx = x + bx
+                wz = z + bz
+                wy = int(glm.simplex(glm.vec2(wx, wz) * 0.01) * 32 + 32)
+                ly = min(wy - by, CHUNK_SIZE)
+                for y in range(ly):
+                    voxels[x + CHUNK_SIZE * z + CHUNK_AREA * y] = by + y + 1
+
+        if not np.any(voxels):
+            self.is_all_zero = True
         return voxels
 
     def appendVD(self, vbd, index, *vds):
@@ -131,4 +143,4 @@ class ChunkMesh(BaseMesh):
                         vbd_index = self.appendVD(
                             vbd, vbd_index, v0, v2, v3, v0, v1, v2
                         )
-        return vbd[:vbd_index]
+        return vbd[: vbd_index + 1]
