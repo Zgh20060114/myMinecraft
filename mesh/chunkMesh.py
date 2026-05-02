@@ -83,6 +83,36 @@ class ChunkMesh(BaseMesh):
             return True
         return False
 
+    def getAmbientOcclusion(self, wx, wy, wz, plane):
+        if plane == "Y":
+            a = self.isEmpty(wx, wy, wz - 1)
+            b = self.isEmpty(wx - 1, wy, wz - 1)
+            c = self.isEmpty(wx - 1, wy, wz)
+            d = self.isEmpty(wx - 1, wy, wz + 1)
+            e = self.isEmpty(wx, wy, wz + 1)
+            f = self.isEmpty(wx + 1, wy, wz + 1)
+            g = self.isEmpty(wx + 1, wy, wz)
+            h = self.isEmpty(wx + 1, wy, wz - 1)
+        if plane == "X":
+            a = self.isEmpty(wx, wy, wz - 1)
+            b = self.isEmpty(wx, wy - 1, wz - 1)
+            c = self.isEmpty(wx, wy - 1, wz)
+            d = self.isEmpty(wx, wy - 1, wz + 1)
+            e = self.isEmpty(wx, wy, wz + 1)
+            f = self.isEmpty(wx, wy + 1, wz + 1)
+            g = self.isEmpty(wx, wy + 1, wz)
+            h = self.isEmpty(wx, wy + 1, wz - 1)
+        if plane == "Z":
+            a = self.isEmpty(wx - 1, wy, wz)
+            b = self.isEmpty(wx - 1, wy - 1, wz)
+            c = self.isEmpty(wx, wy - 1, wz)
+            d = self.isEmpty(wx + 1, wy - 1, wz)
+            e = self.isEmpty(wx + 1, wy, wz)
+            f = self.isEmpty(wx + 1, wy + 1, wz)
+            g = self.isEmpty(wx, wy + 1, wz)
+            h = self.isEmpty(wx - 1, wy + 1, wz)
+        return (a + b + c, c + d + e, e + f + g, g + h + a)
+
     def getChunkVBD(self, chunk_voxels_id, vbo_format_size):
         vbd = np.zeros(
             CHUNK_VOL * 36 * vbo_format_size, dtype=np.uint8
