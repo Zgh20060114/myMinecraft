@@ -23,8 +23,8 @@ class ChunkMesh(BaseMesh):
         super().__init__(engine)
         self.sp = engine.shader_program_manage.chunk
         self.position = position
-        self.vbo_format = "3u1 1u1 1u1"
-        self.vbo_attribution = ("in_position", "in_voxel_id", "in_face_id")
+        self.vbo_format = "3u1 1u1 1u1 1u1"
+        self.vbo_attribution = ("in_position", "in_voxel_id", "in_face_id", "in_ao_id")
         self.vbo_format_size = sum(int(form[0]) for form in self.vbo_format.split(" "))
         self.chunk_voxels_id = self.buildVoxelsId()
         self.vao = None
@@ -111,7 +111,12 @@ class ChunkMesh(BaseMesh):
             f = self.isEmpty(wx + 1, wy + 1, wz)
             g = self.isEmpty(wx, wy + 1, wz)
             h = self.isEmpty(wx - 1, wy + 1, wz)
-        return (a + b + c, c + d + e, e + f + g, g + h + a)
+        return (
+            a + b + c,
+            c + d + e,
+            e + f + g,
+            g + h + a,
+        )  ## 上左前和下右后应该分开,都遵循逆时针,这里每分开,直接在赋值的时候改了
 
     def getChunkVBD(self, chunk_voxels_id, vbo_format_size):
         vbd = np.zeros(
@@ -134,55 +139,61 @@ class ChunkMesh(BaseMesh):
                     # cull_face 面剔除,要求三角形顶点逆时针传递,从立方体外面看,不能透过别的面来看,不然就不叫面剔除了
                     # 顶面
                     if self.isEmpty(wx, wy + 1, wz):
-                        v0 = (x, y + 1, z, voxel_id, 0)
-                        v1 = (x + 1, y + 1, z, voxel_id, 0)
-                        v2 = (x + 1, y + 1, z + 1, voxel_id, 0)
-                        v3 = (x, y + 1, z + 1, voxel_id, 0)
+                        ao = self.getAmbientOcclusion(wx, wy + 1, wz, plane="Y")
+                        v0 = (x, y + 1, z, voxel_id, 0, ao[0])
+                        v1 = (x, y + 1, z + 1, voxel_id, 0, ao[1])
+                        v2 = (x + 1, y + 1, z + 1, voxel_id, 0, ao[2])
+                        v3 = (x + 1, y + 1, z, voxel_id, 0, ao[3])
                         vbd_index = self.appendVD(
-                            vbd, vbd_index, v0, v3, v2, v0, v2, v1
+                            vbd, vbd_index, v0, v1, v2, v0, v2, v3
                         )
                     # 底面
                     if self.isEmpty(wx, wy - 1, wz):
-                        v0 = (x, y, z, voxel_id, 1)
-                        v1 = (x + 1, y, z, voxel_id, 1)
-                        v2 = (x + 1, y, z + 1, voxel_id, 1)
-                        v3 = (x, y, z + 1, voxel_id, 1)
+                        ao = self.getAmbientOcclusion(wx, wy - 1, wz, plane="Y")
+                        v0 = (x, y, z, voxel_id, 1, ao[0])
+                        v1 = (x + 1, y, z, voxel_id, 1, ao[3])
+                        v2 = (x + 1, y, z + 1, voxel_id, 1, ao[2])
+                        v3 = (x, y, z + 1, voxel_id, 1, ao[1])
+                        vbd_index = self.appendVD(
+                            vbd, vbd_index, v0, v2, v3, v0, v1, v2
+                        )
+                    # 左面
+                    if self.isEmpty(wx - 1, wy, wz):
+                        ao = self.getAmbientOcclusion(wx - 1, wy, wz, plane="X")
+                        v0 = (x, y, z, voxel_id, 2, ao[0])
+                        v1 = (x, y, z + 1, voxel_id, 2, ao[1])
+                        v2 = (x, y + 1, z + 1, voxel_id, 2, ao[2])
+                        v3 = (x, y + 1, z, voxel_id, 2, ao[3])
                         vbd_index = self.appendVD(
                             vbd, vbd_index, v0, v2, v3, v0, v1, v2
                         )
                     # 右面
                     if self.isEmpty(wx + 1, wy, wz):
-                        v0 = (x + 1, y, z, voxel_id, 2)
-                        v1 = (x + 1, y, z + 1, voxel_id, 2)
-                        v2 = (x + 1, y + 1, z + 1, voxel_id, 2)
-                        v3 = (x + 1, y + 1, z, voxel_id, 2)
+                        ao = self.getAmbientOcclusion(wx + 1, wy, wz, plane="X")
+                        v0 = (x + 1, y, z, voxel_id, 3, ao[0])
+                        v1 = (x + 1, y + 1, z, voxel_id, 3, ao[3])
+                        v2 = (x + 1, y + 1, z + 1, voxel_id, 3, ao[2])
+                        v3 = (x + 1, y, z + 1, voxel_id, 3, ao[1])
                         vbd_index = self.appendVD(
-                            vbd, vbd_index, v0, v3, v2, v0, v2, v1
-                        )
-                    # 左面
-                    if self.isEmpty(wx - 1, wy, wz):
-                        v0 = (x, y, z, voxel_id, 3)
-                        v1 = (x, y, z + 1, voxel_id, 3)
-                        v2 = (x, y + 1, z + 1, voxel_id, 3)
-                        v3 = (x, y + 1, z, voxel_id, 3)
-                        vbd_index = self.appendVD(
-                            vbd, vbd_index, v0, v2, v3, v0, v1, v2
+                            vbd, vbd_index, v0, v1, v2, v0, v2, v3
                         )
                     # 前面
                     if self.isEmpty(wx, wy, wz + 1):
-                        v0 = (x, y, z + 1, voxel_id, 4)
-                        v1 = (x, y + 1, z + 1, voxel_id, 4)
-                        v2 = (x + 1, y + 1, z + 1, voxel_id, 4)
-                        v3 = (x + 1, y, z + 1, voxel_id, 4)
+                        ao = self.getAmbientOcclusion(wx, wy, wz + 1, plane="Z")
+                        v0 = (x, y, z + 1, voxel_id, 4, ao[0])
+                        v1 = (x + 1, y, z + 1, voxel_id, 4, ao[1])
+                        v2 = (x + 1, y + 1, z + 1, voxel_id, 4, ao[2])
+                        v3 = (x, y + 1, z + 1, voxel_id, 4, ao[3])
                         vbd_index = self.appendVD(
-                            vbd, vbd_index, v0, v3, v2, v0, v2, v1
+                            vbd, vbd_index, v0, v2, v3, v0, v1, v2
                         )
                     # 后面
                     if self.isEmpty(wx, wy, wz - 1):
-                        v0 = (x, y, z, voxel_id, 5)
-                        v1 = (x, y + 1, z, voxel_id, 5)
-                        v2 = (x + 1, y + 1, z, voxel_id, 5)
-                        v3 = (x + 1, y, z, voxel_id, 5)
+                        ao = self.getAmbientOcclusion(wx, wy, wz - 1, plane="Z")
+                        v0 = (x, y, z, voxel_id, 5, ao[0])
+                        v1 = (x, y + 1, z, voxel_id, 5, ao[3])
+                        v2 = (x + 1, y + 1, z, voxel_id, 5, ao[2])
+                        v3 = (x + 1, y, z, voxel_id, 5, ao[1])
                         vbd_index = self.appendVD(
                             vbd, vbd_index, v0, v2, v3, v0, v1, v2
                         )

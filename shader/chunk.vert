@@ -2,14 +2,18 @@
 layout(location=0) in uvec3 in_position;
 layout(location=1) in uint  in_voxel_id;
 layout(location=2) in uint  in_face_id;
+layout(location=3) in uint  in_ao_id;
 
 out vec2 out_uv;
 out vec3 out_voxel_color;
+out float shading;
 
 uniform mat4 m_model;
 uniform mat4 m_view;
 uniform mat4 m_projection;
 
+const float ao_ratio[4] = float[](0.1,0.25, 0.5,1.0);
+const float face_shading[6] = float[](1.0, 0.5, 0.5,0.8,0.5,0.8); // mc默认光照从右后方照射
 
 vec3 get_color(float p) {
     vec3 p3 = fract(vec3(p * 21.2) * vec3(0.1031, 0.1029, 0.0973));
@@ -34,7 +38,9 @@ void main(){
   //   out_color = vec3(in_voxel_id * 0.1, in_face_id * 0.1, 0.5);
   // }
   // out_color = vec4(0.6f,0.4f,0.5f, 1.0f);
-  if(in_voxel_id != 0u && in_face_id != 6u){
+  // if(in_voxel_id != 0u && in_face_id != 6u){
+  //   out_uv = uv_coords[uv_indices[gl_VertexID % 6 ]];
+  // }
     out_uv = uv_coords[uv_indices[gl_VertexID % 6 ]];
-  }
+  shading = face_shading[in_face_id]* ao_ratio[in_ao_id];
 }
