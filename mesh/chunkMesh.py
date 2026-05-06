@@ -15,7 +15,8 @@ from engine.settings import (
 
 if TYPE_CHECKING:
     from engine.VoxelEngine import VoxelEngine
-    from world.world import World
+
+FLIP_MODE = False
 
 
 class ChunkMesh(BaseMesh):
@@ -144,9 +145,19 @@ class ChunkMesh(BaseMesh):
                         v1 = (x, y + 1, z + 1, voxel_id, 0, ao[1])
                         v2 = (x + 1, y + 1, z + 1, voxel_id, 0, ao[2])
                         v3 = (x + 1, y + 1, z, voxel_id, 0, ao[3])
-                        vbd_index = self.appendVD(
-                            vbd, vbd_index, v0, v1, v2, v0, v2, v3
-                        )
+                        if FLIP_MODE:
+                            vbd_index = self.appendVD(
+                                vbd, vbd_index, v0, v2, v3, v0, v1, v2
+                            )
+                        else:
+                            if ao[0] + ao[2] > ao[1] + ao[3]:
+                                vbd_index = self.appendVD(
+                                    vbd, vbd_index, v0, v1, v2, v0, v2, v3
+                                )
+                            else:
+                                vbd_index = self.appendVD(
+                                    vbd, vbd_index, v1, v2, v3, v1, v3, v0
+                                )
                     # 底面
                     if self.isEmpty(wx, wy - 1, wz):
                         ao = self.getAmbientOcclusion(wx, wy - 1, wz, plane="Y")
@@ -154,9 +165,19 @@ class ChunkMesh(BaseMesh):
                         v1 = (x + 1, y, z, voxel_id, 1, ao[3])
                         v2 = (x + 1, y, z + 1, voxel_id, 1, ao[2])
                         v3 = (x, y, z + 1, voxel_id, 1, ao[1])
-                        vbd_index = self.appendVD(
-                            vbd, vbd_index, v0, v2, v3, v0, v1, v2
-                        )
+                        if FLIP_MODE:
+                            vbd_index = self.appendVD(
+                                vbd, vbd_index, v0, v2, v3, v0, v1, v2
+                            )
+                        else:
+                            if ao[0] + ao[2] > ao[1] + ao[3]:
+                                vbd_index = self.appendVD(
+                                    vbd, vbd_index, v0, v1, v2, v0, v2, v3
+                                )
+                            else:
+                                vbd_index = self.appendVD(
+                                    vbd, vbd_index, v1, v2, v3, v1, v3, v0
+                                )
                     # 左面
                     if self.isEmpty(wx - 1, wy, wz):
                         ao = self.getAmbientOcclusion(wx - 1, wy, wz, plane="X")
@@ -164,9 +185,19 @@ class ChunkMesh(BaseMesh):
                         v1 = (x, y, z + 1, voxel_id, 2, ao[1])
                         v2 = (x, y + 1, z + 1, voxel_id, 2, ao[2])
                         v3 = (x, y + 1, z, voxel_id, 2, ao[3])
-                        vbd_index = self.appendVD(
-                            vbd, vbd_index, v0, v2, v3, v0, v1, v2
-                        )
+                        if FLIP_MODE:
+                            vbd_index = self.appendVD(
+                                vbd, vbd_index, v0, v2, v3, v0, v1, v2
+                            )
+                        else:
+                            if ao[0] + ao[2] > ao[1] + ao[3]:
+                                vbd_index = self.appendVD(
+                                    vbd, vbd_index, v0, v1, v2, v0, v2, v3
+                                )
+                            else:
+                                vbd_index = self.appendVD(
+                                    vbd, vbd_index, v1, v2, v3, v1, v3, v0
+                                )
                     # 右面
                     if self.isEmpty(wx + 1, wy, wz):
                         ao = self.getAmbientOcclusion(wx + 1, wy, wz, plane="X")
@@ -174,9 +205,19 @@ class ChunkMesh(BaseMesh):
                         v1 = (x + 1, y + 1, z, voxel_id, 3, ao[3])
                         v2 = (x + 1, y + 1, z + 1, voxel_id, 3, ao[2])
                         v3 = (x + 1, y, z + 1, voxel_id, 3, ao[1])
-                        vbd_index = self.appendVD(
-                            vbd, vbd_index, v0, v1, v2, v0, v2, v3
-                        )
+                        if FLIP_MODE:
+                            vbd_index = self.appendVD(
+                                vbd, vbd_index, v0, v2, v3, v0, v1, v2
+                            )
+                        else:
+                            if ao[0] + ao[2] > ao[1] + ao[3]:
+                                vbd_index = self.appendVD(
+                                    vbd, vbd_index, v0, v1, v2, v0, v2, v3
+                                )
+                            else:
+                                vbd_index = self.appendVD(
+                                    vbd, vbd_index, v1, v2, v3, v1, v3, v0
+                                )
                     # 前面
                     if self.isEmpty(wx, wy, wz + 1):
                         ao = self.getAmbientOcclusion(wx, wy, wz + 1, plane="Z")
@@ -184,9 +225,19 @@ class ChunkMesh(BaseMesh):
                         v1 = (x + 1, y, z + 1, voxel_id, 4, ao[1])
                         v2 = (x + 1, y + 1, z + 1, voxel_id, 4, ao[2])
                         v3 = (x, y + 1, z + 1, voxel_id, 4, ao[3])
-                        vbd_index = self.appendVD(
-                            vbd, vbd_index, v0, v2, v3, v0, v1, v2
-                        )
+                        if FLIP_MODE:
+                            vbd_index = self.appendVD(
+                                vbd, vbd_index, v0, v2, v3, v0, v1, v2
+                            )
+                        else:
+                            if ao[0] + ao[2] > ao[1] + ao[3]:
+                                vbd_index = self.appendVD(
+                                    vbd, vbd_index, v0, v1, v2, v0, v2, v3
+                                )
+                            else:
+                                vbd_index = self.appendVD(
+                                    vbd, vbd_index, v1, v2, v3, v1, v3, v0
+                                )
                     # 后面
                     if self.isEmpty(wx, wy, wz - 1):
                         ao = self.getAmbientOcclusion(wx, wy, wz - 1, plane="Z")
@@ -194,7 +245,17 @@ class ChunkMesh(BaseMesh):
                         v1 = (x, y + 1, z, voxel_id, 5, ao[3])
                         v2 = (x + 1, y + 1, z, voxel_id, 5, ao[2])
                         v3 = (x + 1, y, z, voxel_id, 5, ao[1])
-                        vbd_index = self.appendVD(
-                            vbd, vbd_index, v0, v2, v3, v0, v1, v2
-                        )
+                        if FLIP_MODE:
+                            vbd_index = self.appendVD(
+                                vbd, vbd_index, v0, v2, v3, v0, v1, v2
+                            )
+                        else:
+                            if ao[0] + ao[2] > ao[1] + ao[3]:
+                                vbd_index = self.appendVD(
+                                    vbd, vbd_index, v0, v1, v2, v0, v2, v3
+                                )
+                            else:
+                                vbd_index = self.appendVD(
+                                    vbd, vbd_index, v1, v2, v3, v1, v3, v0
+                                )
         return vbd[: vbd_index + 1]
