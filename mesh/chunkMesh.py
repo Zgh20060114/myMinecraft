@@ -1,6 +1,8 @@
 from typing import TYPE_CHECKING
 import glm
+import numba
 import numpy as np
+from world.noise import _noise
 from mesh.baseMesh import BaseMesh
 from engine.settings import (
     CHUNK_AREA,
@@ -15,12 +17,13 @@ from engine.settings import (
 
 if TYPE_CHECKING:
     from engine.VoxelEngine import VoxelEngine
+    from world.world import World
 
 FLIP_MODE = False
 
 
 class ChunkMesh(BaseMesh):
-    def __init__(self, engine: VoxelEngine, position=glm.ivec3(0, 0, 0)):
+    def __init__(self, engine: VoxelEngine, world: World, position=glm.ivec3(0, 0, 0)):
         super().__init__(engine)
         self.sp = engine.shader_program_manage.chunk
         self.position = position
@@ -30,10 +33,9 @@ class ChunkMesh(BaseMesh):
         self.chunk_voxels_id = self.buildVoxelsId()
         self.vao = None
         self.is_all_zero = False
-        self.world_voxels_id = None
+        self.world_voxels_id = world.world_voxels_id
 
-    def buildChunkMesh(self, world_voxels_id):
-        self.world_voxels_id = world_voxels_id
+    def buildChunkMesh(self):
         self.vao = self.getVAO()
 
     def getVertexBufferDate(self) -> np.ndarray:
@@ -43,19 +45,22 @@ class ChunkMesh(BaseMesh):
     def buildVoxelsId(self):
         voxels = np.zeros(CHUNK_VOL, dtype=np.uint8)
         bx, by, bz = self.position * CHUNK_SIZE
+        self._generateTerrain(bx, by, bz, voxels)
+        if not np.any(voxels):
+            self.is_all_zero = True
+        return voxels
 
+    @staticmethod
+    @numba.njit
+    def _generateTerrain(bx, by, bz, voxels):
         for x in range(CHUNK_SIZE):
             for z in range(CHUNK_SIZE):
                 wx = x + bx
                 wz = z + bz
-                wy = int(glm.simplex(glm.vec2(wx, wz) * 0.01) * 32 + 32)
+                wy = _noise(wx, wz)
                 ly = min(wy - by, CHUNK_SIZE)
                 for y in range(ly):
                     voxels[x + CHUNK_SIZE * z + CHUNK_AREA * y] = by + y + 1
-
-        if not np.any(voxels):
-            self.is_all_zero = True
-        return voxels
 
     def appendVD(self, vbd, index, *vds):
         for vd in vds:

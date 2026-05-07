@@ -3,17 +3,18 @@ from engine.settings import CHUNK_SIZE
 from mesh.chunkMesh import ChunkMesh
 import glm
 
+
 if TYPE_CHECKING:
     from engine.VoxelEngine import VoxelEngine
     from world.world import World
 
 
 class Chunk:
-    def __init__(self, engine: VoxelEngine, position=glm.ivec3(0, 0, 0)):
+    def __init__(self, engine: VoxelEngine, world: World, position=glm.ivec3(0, 0, 0)):
         self.engine = engine
         self.position = position
         self.model_matrix = self.getModelMatrix()
-        self.chunkMesh = ChunkMesh(self.engine, position)
+        self.chunkMesh = ChunkMesh(self.engine, world, position)
         self.sp_chunk = self.chunkMesh.sp
 
     def render(self):
