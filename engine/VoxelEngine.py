@@ -63,6 +63,11 @@ class VoxelEngine:
             elif event.type == pg.KEYDOWN:
                 if event.key == pg.K_ESCAPE:
                     self.is_running = False
+            elif event.type == pg.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    self.scene.world.voxel_select.addVoxel()
+                elif event.button == 3:
+                    self.scene.world.voxel_select.removeVoxel()
 
     def run(self):
         while self.is_running:

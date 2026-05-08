@@ -11,7 +11,7 @@ class Scene:
         self.world = World(engine)
 
     def update(self):
-        pass
+        self.world.update()
 
     def render(self):
         self.world.render()

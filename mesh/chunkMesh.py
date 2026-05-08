@@ -16,16 +16,15 @@ from engine.settings import (
 )
 
 if TYPE_CHECKING:
-    from engine.VoxelEngine import VoxelEngine
     from world.world import World
 
 FLIP_MODE = False
 
 
 class ChunkMesh(BaseMesh):
-    def __init__(self, engine: VoxelEngine, world: World, position=glm.ivec3(0, 0, 0)):
-        super().__init__(engine)
-        self.sp = engine.shader_program_manage.chunk
+    def __init__(self, world: World, position=glm.ivec3(0, 0, 0)):
+        super().__init__(world.engine)
+        self.sp = world.engine.shader_program_manage.chunk
         self.position = position
         self.vbo_format = "3u1 1u1 1u1 1u1"
         self.vbo_attribution = ("in_position", "in_voxel_id", "in_face_id", "in_ao_id")

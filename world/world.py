@@ -4,6 +4,7 @@ import numpy as np
 from typing import TYPE_CHECKING
 
 from world.chunk import Chunk
+from world.voxelSelect import VoxelSelect
 import glm
 
 if TYPE_CHECKING:
@@ -17,24 +18,25 @@ class World:
         self.world_voxels_id = np.zeros([WORLD_VOL, CHUNK_VOL], dtype="uint8")
         self._buidChunksVoxelsID()
         self._buildWorldMeshes()
-        self.voxel_handler = VoxelHandler(self)
+        self.voxel_select = VoxelSelect(self)
 
     def _buidChunksVoxelsID(self):
         for x in range(WORLD_W):
             for z in range(WORLD_D):
                 for y in range(WORLD_H):
                     chunks_index = x + z * WORLD_W + y * WORLD_AREA
-                    self.chunks[chunks_index] = Chunk(
-                        self.engine, self, position=glm.ivec3(x, y, z)
-                    )
+                    self.chunks[chunks_index] = Chunk(self, position=glm.ivec3(x, y, z))
                     self.world_voxels_id[chunks_index] = self.chunks[
                         chunks_index
-                    ].chunkMesh.chunk_voxels_id
+                    ].chunk_mesh.chunk_voxels_id  # 得益于python的赋值都是传递地址(引用),所以访问的是一个东西
 
     def _buildWorldMeshes(self):
         for chunk in self.chunks:
-            chunk.chunkMesh.buildChunkMesh()
+            chunk.chunk_mesh.buildChunkMesh()
 
     def render(self):
         for chunk in self.chunks:
             chunk.render()
+
+    def update(self):
+        self.voxel_select.update()
