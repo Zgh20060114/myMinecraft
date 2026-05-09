@@ -1,6 +1,5 @@
 from typing import TYPE_CHECKING
 import glm
-from numba.cuda import profiling
 
 from engine.settings import (
     CHUNK_AREA,
@@ -11,7 +10,6 @@ from engine.settings import (
     WORLD_H,
     WORLD_W,
 )
-from world import chunk
 
 
 if TYPE_CHECKING:
@@ -36,6 +34,8 @@ class VoxelSelect:
             self.engine.player.position + MAX_RAY_DIST * self.engine.player.forward
         )
         current_voxel_pos = glm.ivec3(self.engine.player.position)
+        self.selected_voxel_normal = glm.ivec3(0)
+        self.selected_voxel_id = 0
         hit_face = -1
 
         direct_x = glm.sign(end_x - start_x)
@@ -61,15 +61,15 @@ class VoxelSelect:
         else:
             dist_x = speed_x * glm.fract(start_x)
         if direct_y > 0:
-            dist_y = speed_x * (1.0 - glm.fract(start_x))
+            dist_y = speed_y * (1.0 - glm.fract(start_y))
         else:
-            dist_y = speed_x * glm.fract(start_x)
+            dist_y = speed_y * glm.fract(start_y)
         if direct_z > 0:
-            dist_z = speed_x * (1.0 - glm.fract(start_x))
+            dist_z = speed_z * (1.0 - glm.fract(start_z))
         else:
-            dist_z = speed_x * glm.fract(start_x)
+            dist_z = speed_z * glm.fract(start_z)
 
-        while dist_x <= 1.0 and dist_y <= 1.0 and dist_z <= 1.0:
+        while dist_x <= 1.0 or dist_y <= 1.0 or dist_z <= 1.0:
             voxel_id, chunk_index, voxel_index, voxel_local_pos = self._getVoxelInfo(
                 current_voxel_pos
             )
@@ -81,11 +81,13 @@ class VoxelSelect:
                 if hit_face == 2:
                     self.selected_voxel_normal.z = -int(direct_z)
                 self.selected_voxel_world_pos = current_voxel_pos
+                # print(self.selected_voxel_world_pos)
                 self.selected_voxel_id = voxel_id
+                # print(self.selected_voxel_id)
                 self.selected_chunk_index = chunk_index
                 self.selected_voxel_index = voxel_index
                 self.selected_voxel_local_pos = voxel_local_pos
-                # return True
+                return True
             if dist_x > dist_y:
                 if dist_y < dist_z:
                     dist_y += speed_y
@@ -104,7 +106,7 @@ class VoxelSelect:
                     dist_z += speed_z
                     current_voxel_pos.z += int(direct_z)
                     hit_face = 2
-        # return False
+        return False
 
     def _getVoxelInfo(self, voxel_world_pos):
         dx, dy, dz = dxyz = voxel_world_pos // CHUNK_SIZE
@@ -127,7 +129,10 @@ class VoxelSelect:
             )
             if not voxel_id:
                 self.world.world_voxels_id[chunk_index, voxel_index] = 3
+                self.world.chunks[chunk_index].chunk_mesh.updateVoxelsId(voxel_index, 3)
                 self.world.chunks[chunk_index].chunk_mesh.buildChunkMesh()
+                if self.world.chunks[chunk_index].chunk_mesh.is_all_zero:
+                    self.world.chunks[chunk_index].chunk_mesh.is_all_zero = False
                 self._rebuild_around_chunk_meshes(new_voxels_world_pos, voxel_local_pos)
                 print("add one")
 
@@ -136,6 +141,9 @@ class VoxelSelect:
             self.world.world_voxels_id[
                 self.selected_chunk_index, self.selected_voxel_index
             ] = 0
+            self.world.chunks[self.selected_chunk_index].chunk_mesh.updateVoxelsId(
+                self.selected_voxel_index, 0
+            )
             self.world.chunks[self.selected_chunk_index].chunk_mesh.buildChunkMesh()
             self._rebuild_around_chunk_meshes(
                 self.selected_voxel_world_pos, self.selected_voxel_local_pos

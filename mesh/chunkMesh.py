@@ -37,6 +37,9 @@ class ChunkMesh(BaseMesh):
     def buildChunkMesh(self):
         self.vao = self.getVAO()
 
+    def updateVoxelsId(self, voxel_index, id):
+        self.chunk_voxels_id[voxel_index] = id
+
     def getVertexBufferDate(self) -> np.ndarray:
         return self.getChunkVBD(self.chunk_voxels_id, self.vbo_format_size)
 
