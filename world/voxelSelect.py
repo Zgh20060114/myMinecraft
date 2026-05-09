@@ -1,5 +1,6 @@
 from typing import TYPE_CHECKING
 import glm
+from numba.cuda import profiling
 
 from engine.settings import (
     CHUNK_AREA,
@@ -10,6 +11,7 @@ from engine.settings import (
     WORLD_H,
     WORLD_W,
 )
+from world import chunk
 
 
 if TYPE_CHECKING:
@@ -21,10 +23,10 @@ class VoxelSelect:
         self.world = world
         self.engine = world.engine
         # rayCast在更新
-        self.selected_voxel_normal = glm.vec3(0)
+        self.selected_voxel_normal = glm.ivec3(0)
         self.selected_voxel_id = 0
-        self.selected_voxel_world_pos = glm.vec3(0)
-        self.selected_voxel_local_pos = glm.vec3(0)
+        self.selected_voxel_world_pos = glm.ivec3(0)
+        self.selected_voxel_local_pos = glm.ivec3(0)
         self.selected_chunk_index = 0
         self.selected_voxel_index = 0
 
@@ -73,11 +75,11 @@ class VoxelSelect:
             )
             if voxel_id:
                 if hit_face == 0:
-                    self.selected_voxel_normal.x = -direct_x
+                    self.selected_voxel_normal.x = -int(direct_x)
                 if hit_face == 1:
-                    self.selected_voxel_normal.y = -direct_y
+                    self.selected_voxel_normal.y = -int(direct_y)
                 if hit_face == 2:
-                    self.selected_voxel_normal.z = -direct_z
+                    self.selected_voxel_normal.z = -int(direct_z)
                 self.selected_voxel_world_pos = current_voxel_pos
                 self.selected_voxel_id = voxel_id
                 self.selected_chunk_index = chunk_index
@@ -116,19 +118,58 @@ class VoxelSelect:
             return 0, 0, 0, 0
 
     def addVoxel(self):
-        pass
+        if self.selected_voxel_id:
+            new_voxels_world_pos = (
+                self.selected_voxel_world_pos + self.selected_voxel_normal
+            )
+            voxel_id, chunk_index, voxel_index, voxel_local_pos = self._getVoxelInfo(
+                new_voxels_world_pos
+            )
+            if not voxel_id:
+                self.world.world_voxels_id[chunk_index, voxel_index] = 3
+                self.world.chunks[chunk_index].chunk_mesh.buildChunkMesh()
+                self._rebuild_around_chunk_meshes(new_voxels_world_pos, voxel_local_pos)
+                print("add one")
 
     def removeVoxel(self):
         if self.selected_voxel_id:
             self.world.world_voxels_id[
-                self.selected_chunk_index, self.selected_voxel_id
+                self.selected_chunk_index, self.selected_voxel_index
             ] = 0
             self.world.chunks[self.selected_chunk_index].chunk_mesh.buildChunkMesh()
-            self.rebuild_around_chunk_mesh()
+            self._rebuild_around_chunk_meshes(
+                self.selected_voxel_world_pos, self.selected_voxel_local_pos
+            )
+            print("remove one")
 
-    def rebuild_around_chunk_mesh(self):
-        wx, wy, wz = self.selected_voxel_world_pos
-        lx, ly, lz = *self.selected_voxel_local_pos
+    def _getChunkIndex(self, wx, wy, wz):
+        ix = wx // CHUNK_SIZE
+        iy = wy // CHUNK_SIZE
+        iz = wz // CHUNK_SIZE
+        if 0 <= ix < WORLD_W and 0 <= iy < WORLD_H and 0 <= iz < WORLD_D:
+            return ix + iz * WORLD_W + iy * WORLD_AREA
+        return -1
+
+    def _rebuild_around_chunk_mesh(self, wx, wy, wz):
+        chunk_index = self._getChunkIndex(wx, wy, wz)
+        if chunk_index != -1:
+            self.world.chunks[chunk_index].chunk_mesh.buildChunkMesh()
+
+    def _rebuild_around_chunk_meshes(self, voxel_world_pos, voxel_local_pos):
+        wx, wy, wz = voxel_world_pos
+        lx, ly, lz = voxel_local_pos
+        if lx == 0:
+            self._rebuild_around_chunk_mesh(wx - 1, wy, wz)
+        if lx == CHUNK_SIZE - 1:
+            self._rebuild_around_chunk_mesh(wx + 1, wy, wz)
+        if ly == 0:
+            self._rebuild_around_chunk_mesh(wx, wy - 1, wz)
+        if ly == CHUNK_SIZE - 1:
+            self._rebuild_around_chunk_mesh(wx, wy + 1, wz)
+        if lz == 0:
+            self._rebuild_around_chunk_mesh(wx, wy, wz - 1)
+        if lz == CHUNK_SIZE - 1:
+            self._rebuild_around_chunk_mesh(wx, wy, wz + 1)
 
     def update(self):
         self.rayCast()

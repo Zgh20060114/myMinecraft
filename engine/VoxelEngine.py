@@ -49,7 +49,7 @@ class VoxelEngine:
         # pg.display.set_caption(str(self.delta_time))
         # print(self.delta_time)
         self.fps = self.clock.get_fps()
-        print(self.fps)
+        # print(self.fps)
 
     def render(self):
         self.context.clear(*BG_COLOR)  # 要清空吗
