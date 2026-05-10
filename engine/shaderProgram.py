@@ -10,6 +10,7 @@ class ShaderProgram:
         self.player = engine.player
         self.texture_manage = engine.texture_manage
         self.chunk = self.getProgram("chunk")
+        self.selected_box = self.getProgram("selectedBox")
         self.setUniformsOnInit()
 
     def getProgram(self, shader_name: str):
@@ -25,7 +26,8 @@ class ShaderProgram:
         self.chunk["m_view"].write(self.player.view_matrix)
         self.chunk["m_projection"].write(self.player.projection_matrix)
         self.chunk["m_model"].write(self.player.model_matrix)
-        self.chunk["texture_0"].value = 0
+        self.chunk["texture_chunk"].value = 0
+        self.chunk["texture_selected_box"].value = 1
 
     def update(self):
         self.chunk["m_view"].write(self.player.view_matrix)

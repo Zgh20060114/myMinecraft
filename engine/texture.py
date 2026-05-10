@@ -1,7 +1,6 @@
 from typing import TYPE_CHECKING
 import pygame as pg
 import moderngl as mgl
-import os
 
 if TYPE_CHECKING:
     from engine.VoxelEngine import VoxelEngine
@@ -10,8 +9,10 @@ if TYPE_CHECKING:
 class Texture:
     def __init__(self, engine: VoxelEngine) -> None:
         self.context = engine.context
-        self.texture_0 = self.loadTexturePng("snow")
-        self.texture_0.use(location=0)
+        self.texture_chunk = self.loadTexturePng("snow")
+        self.texture_chunk.use(location=0)
+        self.texture_selected_box = self.loadTexturePng("frame")
+        self.texture_selected_box.use(location=1)
 
     def loadTexturePng(self, file_name):
         tex = pg.image.load(f"asset/{file_name}.png")
