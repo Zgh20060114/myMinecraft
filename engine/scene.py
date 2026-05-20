@@ -1,5 +1,4 @@
 from typing import TYPE_CHECKING
-from world import world
 from world.world import World
 
 if TYPE_CHECKING:

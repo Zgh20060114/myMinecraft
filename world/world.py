@@ -4,6 +4,7 @@ import numpy as np
 from typing import TYPE_CHECKING
 
 from world.chunk import Chunk
+from world.drawBox import DrawBox
 from world.voxelSelect import VoxelSelect
 import glm
 
@@ -19,6 +20,7 @@ class World:
         self._buidChunksVoxelsID()
         self._buildWorldMeshes()
         self.voxel_select = VoxelSelect(self)
+        self.draw_box = DrawBox(self.voxel_select)
 
     def _buidChunksVoxelsID(self):
         for x in range(WORLD_W):
@@ -37,6 +39,8 @@ class World:
     def render(self):
         for chunk in self.chunks:
             chunk.render()
+        self.draw_box.render()
 
     def update(self):
         self.voxel_select.update()
+        self.draw_box.update()

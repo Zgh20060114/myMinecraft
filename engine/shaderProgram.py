@@ -8,7 +8,6 @@ class ShaderProgram:
     def __init__(self, engine: VoxelEngine) -> None:
         self.context = engine.context
         self.player = engine.player
-        self.texture_manage = engine.texture_manage
         self.chunk = self.getProgram("chunk")
         self.selected_box = self.getProgram("selectedBox")
         self.setUniformsOnInit()
@@ -27,7 +26,12 @@ class ShaderProgram:
         self.chunk["m_projection"].write(self.player.projection_matrix)
         self.chunk["m_model"].write(self.player.model_matrix)
         self.chunk["texture_chunk"].value = 0  # modenGL,必须和frag中的名称对上
-        self.chunk["texture_selected_box"].value = 1
+
+        self.selected_box["m_view"].write(self.player.view_matrix)
+        self.selected_box["m_projection"].write(self.player.projection_matrix)
+        self.selected_box["m_model"].write(self.player.model_matrix)
+        self.selected_box["texture_selected_box"].value = 1
 
     def update(self):
         self.chunk["m_view"].write(self.player.view_matrix)
+        self.selected_box["m_view"].write(self.player.view_matrix)

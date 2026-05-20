@@ -65,9 +65,7 @@ class SelectedBoxMesh(BaseMesh):
             (0, 2, 3),
             (0, 1, 2),
             (0, 2, 3),
-            (0, 1, 2),
-            (0, 2, 3),
         ]
         position_data = self.makeData(vertex_position, vertex_index)
         texture_coord_data = self.makeData(texture_position, texture_index)
-        return np.hstack([position_data, texture_coord_data], dtype=np.uint8)
+        return np.hstack([position_data, texture_coord_data]).astype(np.uint8)
