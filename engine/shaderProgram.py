@@ -26,7 +26,7 @@ class ShaderProgram:
         self.chunk["m_view"].write(self.player.view_matrix)
         self.chunk["m_projection"].write(self.player.projection_matrix)
         self.chunk["m_model"].write(self.player.model_matrix)
-        self.chunk["texture_chunk"].value = 0
+        self.chunk["texture_chunk"].value = 0  # modenGL,必须和frag中的名称对上
         self.chunk["texture_selected_box"].value = 1
 
     def update(self):

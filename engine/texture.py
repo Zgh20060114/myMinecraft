@@ -10,7 +10,7 @@ class Texture:
     def __init__(self, engine: VoxelEngine) -> None:
         self.context = engine.context
         self.texture_chunk = self.loadTexturePng("snow")
-        self.texture_chunk.use(location=0)
+        self.texture_chunk.use(location=0) # 绑定纹理插槽id
         self.texture_selected_box = self.loadTexturePng("frame")
         self.texture_selected_box.use(location=1)
 
