@@ -1,6 +1,7 @@
 import glm
 
 from engine.settings import ASPECT_RATIO, FAR, NEAR, PITCH_MAX, V_FOV
+from world.frustum import Frustum
 
 
 class Camera:
@@ -18,6 +19,7 @@ class Camera:
         self.view_matrix = glm.mat4()
         self.projection_matrix = glm.perspective(V_FOV, ASPECT_RATIO, NEAR, FAR)
         self.model_matrix = glm.mat4(1.0)
+        self.frustum = Frustum(self)
 
     def updateCameraVector(self):
         # yaw是从-90开始的
