@@ -7,6 +7,7 @@ uniform sampler2D texture_selected_box;
 
 void main(){
   vec4 texture_color = texture(texture_selected_box,out_uv);
-  frag_color.rgb = texture_color.rgb + out_box_color;
-  frag_color.a = texture_color.a;
+  // frag_color.rgb = texture_color.rgb + out_box_color;
+  // frag_color.a = texture_color.a;
+  frag_color = texture_color + vec4(out_box_color, 0);
 }
