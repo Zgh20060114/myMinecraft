@@ -34,7 +34,6 @@ class VoxelEngine:
         self.delta_time = 0  # 帧时间
         self.is_running = True
 
-        self.crosshair = CrosshairMesh(self)
         self.player = Player(self)
         self.texture_manage = Texture(self)
         self.shader_program_manage = ShaderProgram(self)
@@ -56,7 +55,6 @@ class VoxelEngine:
     def render(self):
         self.context.clear(*BG_COLOR)  # 要清空吗
         self.scene.render()
-        self.crosshair.render()
         pg.display.flip()  # 交换整个缓冲区
 
     def handle_events(self):

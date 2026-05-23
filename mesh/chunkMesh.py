@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 import glm
 import numba
 import numpy as np
-from world.terrainGen import getHeight
+from world.terrainGen import getHeight, setVoxelId
 from mesh.baseMesh import BaseMesh
 from engine.settings import (
     CHUNK_AREA,
@@ -65,10 +65,12 @@ class ChunkMesh(BaseMesh):
             for z in range(CHUNK_SIZE):
                 wx = x + bx
                 wz = z + bz
-                wy = getHeight(wx, wz)
-                ly = min(wy - by, CHUNK_SIZE)
+                world_height = getHeight(wx, wz)
+                ly = min(world_height - by, CHUNK_SIZE)
                 for y in range(ly):
-                    voxels[x + CHUNK_SIZE * z + CHUNK_AREA * y] = (by + y + 1) % 7 + 1
+                    wy = by + y
+                    # voxels[x + CHUNK_SIZE * z + CHUNK_AREA * y] = (wy + 1) % 7 + 1
+                    setVoxelId(voxels, x, y, z, wx, wy, wz, world_height)
 
     def appendVD(self, vbd, index, *vds):
         for vd in vds:
