@@ -2,7 +2,7 @@ from typing import TYPE_CHECKING
 import glm
 import numba
 import numpy as np
-from world.noise import _noise
+from world.terrainGen import getHeight
 from mesh.baseMesh import BaseMesh
 from engine.settings import (
     CHUNK_AREA,
@@ -65,7 +65,7 @@ class ChunkMesh(BaseMesh):
             for z in range(CHUNK_SIZE):
                 wx = x + bx
                 wz = z + bz
-                wy = _noise(wx, wz)
+                wy = getHeight(wx, wz)
                 ly = min(wy - by, CHUNK_SIZE)
                 for y in range(ly):
                     voxels[x + CHUNK_SIZE * z + CHUNK_AREA * y] = (by + y + 1) % 7 + 1
