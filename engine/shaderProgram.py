@@ -1,5 +1,7 @@
 from typing import TYPE_CHECKING
 
+from engine.settings import BG_COLOR, FOG_DENSITY, WATER_AMPLIFY_SCALE, WATER_LINE
+
 if TYPE_CHECKING:
     from engine.VoxelEngine import VoxelEngine
 
@@ -10,6 +12,7 @@ class ShaderProgram:
         self.player = engine.player
         self.chunk = self.getProgram("chunk")
         self.selected_box = self.getProgram("selectedBox")
+        self.water = self.getProgram("water")
         self.setUniformsOnInit()
 
     def getProgram(self, shader_name: str):
@@ -27,12 +30,22 @@ class ShaderProgram:
         self.chunk["m_model"].write(self.player.model_matrix)
         # self.chunk["texture_chunk"].value = 0  # modenGL,必须和frag中的名称对上
         self.chunk["texture_array"].value = 2  # modenGL,必须和frag中的名称对上
+        self.chunk["bg_color"].value = BG_COLOR
+        self.chunk["fog_density"].value = FOG_DENSITY
+        self.chunk["water_line"].value = WATER_LINE
 
         self.selected_box["m_view"].write(self.player.view_matrix)
         self.selected_box["m_projection"].write(self.player.projection_matrix)
         self.selected_box["m_model"].write(self.player.model_matrix)
         self.selected_box["texture_selected_box"].value = 1
 
+        self.water["m_view"].write(self.player.view_matrix)
+        self.water["m_projection"].write(self.player.projection_matrix)
+        self.water["water_line"].value = WATER_LINE
+        self.water["water_amplify_scale"].value = WATER_AMPLIFY_SCALE
+        self.water["texture_water"].value = 3
+
     def update(self):
         self.chunk["m_view"].write(self.player.view_matrix)
         self.selected_box["m_view"].write(self.player.view_matrix)
+        self.water["m_view"].write(self.player.view_matrix)

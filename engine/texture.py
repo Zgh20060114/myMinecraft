@@ -15,6 +15,8 @@ class Texture:
         self.texture_selected_box.use(location=1)
         self.texture_array = self.loadTexturePng("tex_array_0", is_array=True)
         self.texture_array.use(location=2)
+        self.water = self.loadTexturePng("water")
+        self.water.use(location=3)
 
     def loadTexturePng(self, file_name, is_array=False):
         tex = pg.image.load(f"asset/{file_name}.png")

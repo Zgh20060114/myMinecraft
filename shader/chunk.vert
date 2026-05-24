@@ -6,6 +6,7 @@ layout(location=3) in uint  in_ao_id;
 layout(location=4) in uint  in_flip_id;
 
 out vec2 out_uv;
+out float out_position_y;
 // out vec3 out_voxel_color;
 out float shading;
 flat out uint out_voxel_id;
@@ -47,6 +48,7 @@ void main(){
   // }
   out_voxel_id  = in_voxel_id;
   out_face_id = in_face_id;
+  out_position_y = (m_model * vec4(in_position, 1.0)).y;
   out_uv = uv_coords[uv_indices[gl_VertexID % 6 + int(in_flip_id)*6]];
   shading = face_shading[in_face_id]* ao_ratio[in_ao_id];
 }

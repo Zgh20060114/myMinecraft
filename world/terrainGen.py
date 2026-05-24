@@ -107,11 +107,14 @@ def plantTree(voxels, x, y, z):
         return
     if y + TREE_HEIGHT > CHUNK_SIZE - 1:
         return
+
+    # voxels[getIndex(x, y, z)] = DIRT
     for iy in range(1, H_TREE_HEIGHT + 1):
         voxels[getIndex(x, y + iy, z)] = WOOD
-    rand01 = int(random() * 2)
     for iy in range(H_TREE_HEIGHT + 1, TREE_HEIGHT):
+        rand01 = int(random() * 2)
         for ix in range(-H_TREE_WIDTH + rand01, H_TREE_WIDTH - rand01):
+            rand01 = int(random() * 2)
             for iz in range(-H_TREE_WIDTH + rand01, H_TREE_WIDTH - rand01):
-                if (ix + iz) % 4:
-                    voxels[getIndex(x + ix, y + iy, z + iz)] = LEAVES
+                # if (ix + iz) % 4:
+                voxels[getIndex(x + ix, y + iy, z + iz)] = LEAVES
