@@ -31,7 +31,9 @@ void main(){
   vec3 texture_color = texture(texture_array,vec3(uv,out_voxel_id)).rgb;
   texture_color = pow(texture_color,gamma ); // 线性空间
   // texture_color *= out_voxel_color;
-  if(out_position_y < water_line){
+  //out_position_y 在离开顶点着色器时是顶点的 Y，
+  //但到了片元着色器里就已经变成了像素（片元）的 Y
+  if(out_position_y < water_line){ 
     texture_color *= vec3(0.0, 0.3, 1.0);
   }
   float fog_dist = gl_FragCoord.z / gl_FragCoord.w;
